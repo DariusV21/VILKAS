@@ -1,0 +1,9 @@
+# Closed-source files must never be committed here
+*.kicad_*
+*.gbr
+*.drl
+*-backups/
+*.ino.elf
+.DS_Store
+Thumbs.db
+_to_delete/
