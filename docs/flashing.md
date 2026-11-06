@@ -2,82 +2,85 @@
 
 VILKAS boards are never locked. You can flash official firmware, your own firmware or someone else's firmware, then go back again.
 
+**Settings and pairing are kept** across normal updates: the RX keeps its bound remote, channel and robot settings; the remote keeps its calibration and robot list.
+
 ## Which file?
 
-Official images are in [`firmware/`](../firmware/), one folder per version and prefix (`RX_v4.32_LB/`, `TX_v4.22/`):
+Official images are in [`firmware/`](../firmware/) and on the [Releases page](https://github.com/DariusV21/VILKAS/releases):
 
 | File | Use for | How |
 |---|---|---|
-| `RX_Rev<R>_V<x.xx>_usb_<PFX>.bin` | RX full image (bootloader + partitions + app) | **USB**, flash at `0x0` |
-| `RX_Rev<R>_V<x.xx>_ota_<PFX>.bin` | RX app only | **Wi-Fi update** in the browser |
-| `TX_Rev_<R>_V<x.xx>.bin` | TX full image | **USB**, flash at `0x0` |
+| `RX_Rev<R>_V<x.xx>_ota_<PFX>.bin` | Robot, app only | **Wi-Fi update** in the browser (recommended) |
+| `RX_Rev<R>_V<x.xx>_usb_<PFX>.bin` | Robot, full image | **USB**, flash at `0x0` |
+| `TX_Rev_<R>_V<x.xx>.bin` | Remote, full image | **USB**, flash at `0x0` |
+| `SHA256SUMS.txt` | Checksums | `sha256sum -c SHA256SUMS.txt` |
 
-- `<R>` is the **board revision** (`C`, `D`). It must match your board, and the Wi-Fi updater refuses a wrong one.
-- `<PFX>` is the **manufacturer prefix** that the robot shows on the remote: `LB` for boards bought from [Lithuanian Bots](https://lithuanianbots.com/), `DV` for boards from DV Electronics (firmware on request). Pick the one your board was sold with. It only changes the robot's name, not how it drives.
-- **RX Rev D:** the firmware is ready, but there is no hardware yet.
+- `<R>` is the **board revision**: RX `B`, `C`, `D`; TX `B`, `C`. It must match your board. The remote shows the robot's revision in `SYSTEM > Info` (`HW:C`). The Wi-Fi updater refuses a wrong revision.
+- `<PFX>` is the **manufacturer prefix**: `LB` for boards from [Lithuanian Bots](https://lithuanianbots.com/). It's the start of the robot's name (`LB-…`). Pick the one your board was sold with. A different prefix renames the robot, so the Wi-Fi updater asks for confirmation.
+- The remote has no hardware ID, so make sure you pick the TX file for your remote's revision.
 
-Check the download against `SHA256SUMS.txt`:
+## 1. Wi-Fi update (robot, no cable)
 
-```bash
-sha256sum -c SHA256SUMS.txt
+1. Put the robot in **Wi-Fi mode**:
+   - **From the remote:** `ROBOT > AP-Mode`, hold the joystick button 2 s (robot standing still). The remote shows the network name, address and PIN.
+   - **On the robot:** hold BIND for **≥ 5 s** while powering up, and release it when the LED lights. This doesn't clear the pairing.
+2. On a phone or PC, join the network **`VILKAS-<robot>`**. It's open, unless `ROBOT > AP Pass` is `PIN` (then use the PIN from the remote). A BIND-held start is always open.
+3. Open **http://4.3.2.1/update**, or on the phone's drive page tap ⚙ → hold **Advanced settings** for 2 s.
+   - RX 4.30–4.31: network `BB-UPD-<robot>`, page http://192.168.4.1/update
+   - RX 4.00–4.2x: network `BB-UPD-<robot>`, page http://192.168.4.1
+4. Select the **`_ota_`** file for your board revision and upload it. The LED flickers while writing. Don't power off.
+5. The robot restarts with the new firmware. No rebinding is needed.
+
+**What the updater checks:**
+
+- It's a valid ESP32 app image (not a `_usb_` image or bootloader).
+- It contains the marker `BBRX-IMG/HW:<rev>/END` for **the same board revision**.
+- From RX 5.35 the **maker tag** `BBRX-PFX:<prefix>/END` must match too, unless *Allow maker tag change* is ticked. Images before 5.35 have no tag and are accepted.
+- The checksum is verified before the image is activated. A failed or interrupted upload leaves the old firmware running.
+- The new firmware is kept only after it has started fully. If it crashes during start-up, the robot rolls back to the previous firmware.
+
+Holding BIND for 5 s at power-up always gets you back into Wi-Fi mode, because that check runs before anything else.
+
+**Custom RX firmware** that should be installable through the official Wi-Fi updater must include the markers, e.g.
+
+```cpp
+extern "C" const char RX_IMAGE_MARKER[] __attribute__((used)) = "BBRX-IMG/HW:C/END";
+extern "C" const char RX_TAG_MARKER[]   __attribute__((used)) = "BBRX-PFX:XX/END";
 ```
 
-## 1. USB (TX and RX)
+Once custom firmware is running, the official updater is gone. To go back to official firmware, use USB.
 
-**TX:** connect the USB-C port on the remote's ESP32-C3 module.
-**RX:** connect through the VILKAS programming board, or wire USB D−/D+ (GPIO18/19), 5 V and GND to the board.
+## 2. USB (remote and robot)
+
+Needed for the remote, for the very first flash, or when Wi-Fi isn't an option.
+
+- **Remote:** connect the USB-C port on its ESP32-C3 module.
+- **Robot:** use the VILKAS programming board, or wire USB D−/D+ (GPIO18/19), 5 V and GND to the board.
+
+> **ESC calibration is skipped while the robot is connected by USB**, so a robot on your desk can't spin up its weapon.
 
 ### Option A: browser (no install)
 
 1. Open the [Espressif web flasher](https://espressif.github.io/esptool-js/) in Chrome or Edge.
-2. Click **Connect** and select the ESP32-C3 serial/JTAG port.
-3. Set the flash address to `0x0`, select the `_usb_` file (RX) or the `TX_Rev_…` file and click **Program**.
+2. Click **Connect** and select the ESP32-C3 port. If none appears, hold BOOT while plugging in.
+3. Set the flash address to **`0x0`**, choose the `_usb_` file (robot) or the `TX_Rev_…` file (remote) and click **Program**.
 4. Power-cycle the device.
 
 ### Option B: esptool
 
 ```bash
 pip install esptool
-esptool.py --chip esp32c3 --port COM5 write_flash 0x0 RX_RevC_V4.32_usb_DV.bin
+esptool.py --chip esp32c3 --port COM5 --baud 460800 write_flash 0x0 TX_Rev_C_V5.36.bin
 ```
 
-### If the port doesn't appear
+Replace `COM5` with your port (`/dev/ttyACM0` on Linux, `/dev/cu.usbmodem…` on macOS).
 
-Custom firmware can disable or crash the USB port. The ESP32-C3 **ROM bootloader can't be overwritten**, so you can always recover:
+If a device behaves strangely after an upgrade, run `esptool.py --chip esp32c3 erase_flash` first, then write the full image again, then re-pair and re-calibrate. Erasing an RX also clears its bound remote and all robot settings.
 
-1. Hold **GPIO9 (BOOT) LOW** while you power up or reset the board.
-2. The chip enters ROM download mode and the USB port appears.
-3. Flash a full image as above.
+### Recovery
 
-## 2. Wi-Fi update (RX only, no cable)
-
-1. Put the robot in **Wi-Fi mode** in one of these ways:
-   - Hold BIND for **≥ 5 s** while powering up, and release it when the LED lights.
-   - On a paired remote, choose `SYSTEM > RX AP-Mode` (`RX Update` on TX 4.20).
-   - If *Always start in Wi-Fi phone mode* is on, the robot is already in Wi-Fi mode.
-2. Connect a phone or PC to the open network `VILKAS-<robot name>`.
-3. The phone drive page opens. Tap ⚙ → **Advanced settings** (hold 2 s), or go to **http://4.3.2.1/update**.
-   - RX 4.30–4.31: network `BB-UPD-<robot name>`, page http://192.168.4.1/update
-   - RX 4.00–4.2x: network `BB-UPD-<robot name>`, page http://192.168.4.1
-4. Select the `_ota_` file for your board revision and upload it. Don't power off while it uploads.
-5. The RX checks the image, writes it to the spare OTA slot and reboots. If the new firmware doesn't start correctly, the bootloader rolls back to the previous one.
-
-The drive motors and weapons stop while firmware is being written. If nothing happens for 10 minutes, the robot leaves Wi-Fi mode, unless *Always start in Wi-Fi phone mode* is on.
-
-The updater accepts only images that:
-
-- are a valid ESP32 app image (not a full `_usb_` image),
-- contain the marker string `BBRX-IMG/HW:<rev>/END`, where `<rev>` matches the board revision,
-- pass ESP-IDF checksum verification.
-
-**Custom RX firmware** that should be installable through the official Wi-Fi updater must include that marker string, e.g.
-
-```cpp
-extern "C" const char RX_IMAGE_MARKER[] __attribute__((used)) = "BBRX-IMG/HW:C/END";
-```
-
-Once custom firmware is running, the official updater is no longer present. To go back to official firmware, use USB.
+Custom firmware can disable or crash the USB port. The ESP32-C3 **ROM bootloader can't be overwritten**, so you can always recover: hold **GPIO9 (BOOT) LOW** while powering up or resetting, and the port appears in download mode. Then flash a full image.
 
 ## 3. Going back to official firmware
 
-Flash the latest official full image over USB (section 1). Robot settings (motor direction, limits, rates, phone layout) and pairing are stored in NVS. They survive a Wi-Fi app update, but a full USB flash may reset them. If so, set the robot up again from the remote menu or the phone.
+Flash the latest official full image over USB (section 2).

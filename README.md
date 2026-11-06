@@ -16,10 +16,10 @@
 
 | Unit | What it is |
 |------|------------|
-| **VILKAS-TX** | Handheld remote: joystick, weapon wheel, FLIP switch, OLED menu, buzzer, 1S battery |
+| **VILKAS-TX** | Handheld remote: joystick, weapon knob, FLIP switch, OLED menu with match timer, buzzer, 1S battery. Remembers up to 8 robots. |
 | **VILKAS-RX** | 20 × 30 mm receiver/driver board for the robot: 2 × brushed drive motors, weapon signal output (ESC / SERVO), battery telemetry. Rev D adds a third H-bridge for a brushed DC weapon. |
 
-It works like a Malenki Nano + FlySky FS-i6X combination, but it's cheaper. Robot settings (motor direction, speed and weapon limits, rates) are stored **in the robot**, so any VILKAS-TX can drive any VILKAS-RX without being set up again.
+It works like a Malenki Nano + FlySky FS-i6X combination, but it's cheaper. 100 control packets per second, quiet 20 kHz motor drive, live telemetry, and a failsafe that always stops. Robot settings (motor direction, speed, weapon limits, driving feel) are stored **in the robot**, so any VILKAS-TX can drive any VILKAS-RX without being set up again.
 
 **No remote? Use a phone.** From RX firmware 4.30, any VILKAS-RX can be driven from a phone browser over the robot's own Wi-Fi, with no app. See [phone control](docs/phone-control.md).
 
@@ -32,25 +32,27 @@ It works like a Malenki Nano + FlySky FS-i6X combination, but it's cheaper. Robo
 
 ### Got a VILKAS from Lithuanian Bots? Start here
 
-1. **Pair:** hold BIND on the robot while powering it up, then hold BIND on the remote while powering it up and pick your robot (`LB-…`). See the [system overview](docs/system-overview.md).
+1. **Pair:** hold BIND on the robot while powering it up, then hold BIND on the remote while powering it up and pick your robot (`LB-…`). See the [user guide](docs/user-guide.md#quick-start).
 2. **No remote?** Hold BIND on the robot for 5 s at power-up, join the Wi-Fi network `VILKAS-LB-…` with your phone and drive. See [phone control](docs/phone-control.md).
-3. **Update the firmware:** download it from [`firmware/RX_v4.32_LB/`](firmware/RX_v4.32_LB/) and follow [flashing](docs/flashing.md). Wi-Fi update needs no cable.
+3. **Update the firmware:** get the [latest release](https://github.com/DariusV21/VILKAS/releases) and follow [flashing](docs/flashing.md). Robots update over Wi-Fi, no cable needed.
+4. **Learn the menus:** [user guide](docs/user-guide.md).
 
 ## Current status
 
 | | Hardware | Firmware |
 |---|---|---|
-| VILKAS-RX Rev C | ✅ Shipping | ✅ RX 4.32 |
-| VILKAS-RX Rev D (triple DC motor) | ⏳ Not built yet | ✅ Ready (RX 4.32) |
-| VILKAS-TX Rev B | ✅ Shipping | ✅ TX 4.22 |
-
-> Status: private preview. This repository will be made public.
+| VILKAS-RX Rev B | In the field | ✅ RX 5.36 |
+| VILKAS-RX Rev C | ✅ Shipping | ✅ RX 5.36 |
+| VILKAS-RX Rev D (triple DC motor) | ⏳ Not built yet | ✅ Ready (RX 5.36) |
+| VILKAS-TX Rev B | In the field | ✅ TX 5.36 |
+| VILKAS-TX Rev C | ✅ Released | ✅ TX 5.36 |
 
 ## What this repository contains
 
 | Folder | Contents | License |
 |--------|----------|---------|
-| [`docs/protocol/`](docs/protocol/) | Radio protocol specification (ESP-NOW, protocol v4.x) and the reference `bb_protocol.h` header | MIT (header), CC BY 4.0 (text) |
+| [`docs/user-guide.md`](docs/user-guide.md) | Quick start, menus, home screen, LEDs, safety, tournament use, troubleshooting | CC BY 4.0 |
+| [`docs/protocol/`](docs/protocol/) | Radio protocol specification (ESP-NOW, protocol v4.3) and the reference `bb_protocol.h` header | MIT (header), CC BY 4.0 (text) |
 | [`docs/hardware/`](docs/hardware/) | Pinouts, electrical specifications and board dimensions for VILKAS-RX and VILKAS-TX | CC BY 4.0 |
 | [`docs/phone-control.md`](docs/phone-control.md) | Driving a robot from a phone (RX ≥ 4.30), plus the phone WebSocket interface | CC BY 4.0 |
 | [`docs/flashing.md`](docs/flashing.md) | How to flash official firmware, your own firmware, and how to go back | CC BY 4.0 |
@@ -77,6 +79,7 @@ Every VILKAS-RX announces a 2-character manufacturer prefix (shown on the remote
 
 ## Quick links
 
+- [User guide](docs/user-guide.md)
 - [System overview](docs/system-overview.md)
 - [Phone control](docs/phone-control.md)
 - [Protocol v4 specification](docs/protocol/VILKAS-protocol-v4.md)

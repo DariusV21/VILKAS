@@ -32,7 +32,11 @@
 
 #define BB_MAGIC        0xB0
 #define BB_PROTO_MAJOR  4
-#define BB_PROTO_MINOR  1   // 4.1: ControlPacket.wpn_live, PARAM_WPN_OUT, TLM_FLAG_WPN_SAFE
+#define BB_PROTO_MINOR  3   // 4.1: ControlPacket.wpn_live, PARAM_WPN_OUT, TLM_FLAG_WPN_SAFE
+                            // 4.2 (5.20): TelemetryPacket.rxRssi / channel / echoHoldMs, kanalo keitimo patvirtinimas
+                            // 4.3 (5.25): TelemetryPacket.resetReason / resetCount, PARAM_REV_RAMP
+                            //     (5.30): PARAM 22..25, TLM_FLAG_LV_LIMIT (tik nauji ID / bitas - minor nekeiciamas)
+                            //     (5.35): PARAM 26..27, PARAM_ACT_ESC_CAL / PARAM_ACT_EXIT_WIFI, TLM_FLAG_PHONE_MODE
 
 // Paketu tipai (PktHeader.type)
 enum : uint8_t {
@@ -60,6 +64,9 @@ struct PktHeader {
                                         // pultas vienkartinai nukopijuoja savo reiksmes
 #define TLM_FLAG_WPN_SAFE     0x02      // (4.1) Ginklas neapginkluotas: laukiama, kol ratukas bus ties 0%
                                         // (ESC) arba centre (DC). Po ijungimo ir po ginklo failsafe.
+#define TLM_FLAG_LV_LIMIT     0x04      // (5.30) Zemos itampos apsauga ijungta: galia ribojama (iki RX perkrovimo)
+#define TLM_FLAG_PHONE_MODE   0x08      // (5.35) RX Wi-Fi telefono rezime: pulto valdymas IGNORUOJAMAS (tik telemetrija,
+                                        // parametrai ir PARAM_ACT_EXIT_WIFI). echo_time / rxRssi - is pulto paketu
 
 // ── PKT_OFFER (RX -> broadcast FF:FF:FF:FF:FF:FF) ──
 struct OfferPacket {
@@ -80,8 +87,8 @@ struct ControlPacket {
   uint8_t  btn;            // Joystick mygtukas: 1 = paspaustas
   uint8_t  flip;           // FLIP: 1 = aktyvus (jau pritaikytas miksavime)
   uint8_t  cmd_channel;    // 0 = nieko, 1..13 (nelyginis) = pereiti i si kanala
-  uint8_t  fs_mot1;        // 1 = dingus rysiui stabdyti kairi varikli
-  uint8_t  fs_mot2;        // 1 = dingus rysiui stabdyti desini varikli
+  uint8_t  fs_mot1;        // 1 = dingus rysiui stabdyti kairi varikli (nuo TX/RX 5.00 visada 1; RX 5.00+
+  uint8_t  fs_mot2;        // 1 = dingus rysiui stabdyti desini varikli  sie laukai ignoruoja - failsafe visada STOP)
   uint8_t  fs_weapon;      // 1 = dingus rysiui stabdyti ginkla
   uint16_t tx_time;        // TX millis() & 0xFFFF - RTT matavimui
   // ── 4.1 ──
@@ -102,7 +109,19 @@ struct TelemetryPacket {
   uint8_t  flags;          // TLM_FLAG_*
   uint16_t paramRev;       // Keiciasi pasikeitus bet kuriam parametrui -> pultas persiskaito visus
   uint32_t caps;           // CAP_*
+  // ── 4.2 (5.20) ──  (senesnio RX paketas trumpesnis -> 0 = "nezinoma")
+  int8_t   rxRssi;         // Paskutinio PKT_CONTROL RSSI roboto puseje (dBm), 0 = nezinoma
+  uint8_t  channel;        // RX kanalas. Gavus cmd_channel - JAU NAUJAS (patvirtinimas: RX persijungia po ~60 ms,
+                           // pultas persijungia gaves si patvirtinima). 0 = nezinoma
+  uint16_t echoHoldMs;     // Kiek ms praejo nuo echo_time paketo gavimo iki sios telemetrijos issiuntimo -
+                           // pultas atima is RTT (tikra delsa, be laukimo iki 10 Hz telemetrijos)
+  // ── 4.3 (5.25) ──
+  uint8_t  resetReason;    // Paskutinio NETIKETO RX persikrovimo priezastis: RST_* (0 = nebuvo nuo ijungimo)
+  uint8_t  resetCount;     // Kiek netiketu persikrovimu nuo maitinimo ijungimo (brown-out, watchdog, kritine klaida)
 } __attribute__((packed));
+
+// TelemetryPacket.resetReason (4.3)
+enum : uint8_t { RST_NONE = 0, RST_BROWNOUT = 1, RST_WATCHDOG = 2, RST_CRASH = 3, RST_OTHER = 4 };
 #define TELEMETRY_MIN_LEN 21
 
 // ── Parametru kanalas ──
@@ -147,12 +166,42 @@ enum : uint16_t {
                            // Keiciama tik robotui stovint; po pakeitimo ginklas neapginkluotas.
   PARAM_Q_MAX      = 17,   // (RX 4.30) Q kanalo (DC) MAX % (PARAM_DC_START..100). Nuo 4.30 PARAM_WPN_MIN/MAX taikomi
                            // tik W kanalui (ESC), Q turi savo: MIN = PARAM_DC_START, MAX = PARAM_Q_MAX.
-  PARAM_ID_LAST    = 17,   // Paskutinis nustatymu ID (pultas sinchronizuoja 1..PARAM_ID_LAST)
+  // (RX 5.10)
+  PARAM_DRV_MIN    = 18,   // Vaziuokles variklio pradine galia % (0..50): bet koks nenulinis valdymas -> MIN..100%
+                           // (anksciau RX "deadband" ~10% - mazas greitis buvo nukerpamas iki 0). 0 = tiesiskai.
+  // (RX 5.15)
+  PARAM_TURN       = 19,   // Sukimosi jautrumas % (10..100) - saugo RX, taiko TX (ir telefonas) tik X (sukimo) asiai.
+                           // Nuo 5.15 pulto meniu "Speed" = PARAM_SPD_LMT, "Turn" = PARAM_TURN; PARAM_RATE RX 5.15
+                           // pirma karta paleidus perkeliamas i PARAM_SPD_LMT (rate -> 100), kad pojutis nepasikeistu.
+  // (RX 5.20)
+  PARAM_ESC_RAMP   = 20,   // Kanalo W (ESC) isibegejimas 0 -> 100 %, ms (0..2000; 0 = be ramp - ESC savo ramp).
+                           // Iki 5.20 fiksuotas ~1.1 s. Letejimas visada staigus. SERVO - netaikoma.
+  // (RX 5.25)
+  PARAM_REV_RAMP   = 21,   // Vaziuokles krypties keitimas per 0: ms nuo pilnos galios iki 0 (0..200; 0 = is karto).
+                           // Mazina srove apsukant varikli (dazniausia brown-out priezastis). Greitejimas neribojamas.
+  // (RX 5.30)
+  PARAM_DRV_BRAKE  = 22,   // Vaziuokle, kai komanda 0: 0 = coast (laisvai), 1 = brake (stabdo, abu IN HIGH). Failsafe - visada coast
+  PARAM_LV_CUT     = 23,   // Zemos itampos apsauga: elemento itampa x100 (0 = OFF, 300..380). Zemiau 0.3 s - galia
+                           // (vaziuokle ir ginklas) ribojama iki 50 % iki RX perkrovimo, telemetrijoje TLM_FLAG_LV_LIMIT
+  PARAM_W_RATE     = 24,   // Kanalo W (ESC) signalo daznis Hz (50..400; 50 / 100 / 200 / 400). SERVO - visada 50 Hz.
+                           // Keiciama tik robotui stovint; po pakeitimo ginklas neapginkluotas
+  PARAM_FAILSAFE   = 25,   // Failsafe laikas ms (200..1000): vaziuokle stoja po tiek, ginklas - po +350 ms
+  PARAM_AP_PASS    = 26,   // (5.35) Wi-Fi (telefono) tinklo slaptazodis: 0 = atviras, 1 = PIN (PARAM_AP_PIN).
+                           // Ijungiant laikant BIND tinklas VISADA atviras (jei PIN pamirstas)
+  PARAM_AP_PIN     = 27,   // (5.35) 8 skaitmenu PIN (10000000..99999999), tik skaitomas. Sugeneruojamas viena karta (NVS)
+  PARAM_ID_LAST    = 27,   // Paskutinis nustatymu ID (pultas sinchronizuoja 1..PARAM_ID_LAST)
 
   // Veiksmai (0x100+): SET su raktu atlieka veiksma, GET grazina 0
   PARAM_ACT_UPDATE_MODE = 0x100,   // SET PARAM_UPDATE_KEY -> RX persikrauna i Wi-Fi atnaujinimo rezima
+  PARAM_ACT_ESC_CAL     = 0x101,   // (5.35) SET PARAM_ESC_CAL_KEY -> kita IJUNGIMA (maitinimo) kanalas W isveda 2000 us,
+                                   // po to 1000 us (ESC droselio kalibracija). Tik ESC signalas, robotas stovi.
+                                   // Jei per ESC_CAL_ARM_MS maitinimas neisjungiamas - atsaukiama. SET 0 - atsaukti.
+  PARAM_ACT_EXIT_WIFI   = 0x102,   // (5.35) SET PARAM_EXIT_WIFI_KEY telefono rezime -> RX persikrauna i iprasta
+                                   // (pulto) rezima VIENA karta (net jei ijungta "visada Wi-Fi")
 };
-#define PARAM_UPDATE_KEY  0x54445055L   // "UPDT"
+#define PARAM_UPDATE_KEY    0x54445055L   // "UPDT"
+#define PARAM_ESC_CAL_KEY   0x43435345L   // "ESCC"
+#define PARAM_EXIT_WIFI_KEY 0x54495845L   // "EXIT"
 
 #define BATT_TYPE_LIPO 0
 #define BATT_TYPE_LIHV 1

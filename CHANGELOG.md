@@ -2,6 +2,50 @@
 
 User-facing changes in official VILKAS firmware. Protocol changes are marked **[protocol]**.
 
+## TX 5.36 / RX 5.36 — 2026-11-06
+
+First public 5.x release. It contains everything from 5.00 to 5.36. Update the remote and the robots together for every feature; mixed 4.x / 5.x devices still work together. **TX Rev C is supported from this release**, and RX Rev B images are back.
+
+### Radio and reliability
+- **100 Hz control** (was 50 Hz). The display is drawn in slices, so it never delays a packet. Wi-Fi power save is off on both sides.
+- **Failsafe always stops** (the S0/S1 option is gone). The time is configurable in `ROBOT > Failsafe`: 250 / 500 / 1000 ms; the weapon stops 350 ms later.
+- The robot stays connected while you're in menus. A stuck button can't freeze the remote.
+- Link alerts: a rising chime when the robot connects, a falling tone and `LINK LOST!` after 0.5 s without it.
+- Faster reconnect: the remote starts searching after 0.7 s. Switching or pairing a robot no longer restarts the remote.
+- **[protocol 4.2]** Real latency (the robot reports how long it held the packet), two-way signal bars, confirmed channel changes.
+- **[protocol 4.3]** Fast recovery: after a brown-out, watchdog or crash the robot is back in ~0.2 s, and the remote shows `BROWNOUT!` / `RX WDOG!` / `RX CRASH!`. A 1 s watchdog guards the robot's control loop.
+- Settings are written to flash only while the robot is stopped and the battery is healthy.
+- `RADIO > Ch Scan` shows how busy channels 1 / 5 / 9 / 13 are. `Channel` offers only these four non-overlapping channels.
+
+### Driving feel
+- **Quiet, linear motors:** drive PWM is 20 kHz / 10-bit with slow decay (was 5 kHz / 8-bit).
+- New robot settings: `Min Start` (power at the smallest stick movement), `Turn` (steering sensitivity), `Stop` (Coast / Brake), `Rev Ramp` (soft direction changes, protects against brown-outs). `Speed` replaces `Max Rate` + `Motr Spd`; RX 5.15 converts the old values once.
+- Smoother sticks (4-sample averaging, jump-free deadzone). Easier stick calibration (centre → circle → up → right); an uncalibrated remote offers calibration by itself.
+
+### Weapon
+- `W Ramp` (ESC spin-up time, or OFF), `W Rate` (ESC signal 50 / 100 / 200 / 400 Hz).
+- **`ESC Cal`:** ESC throttle calibration from the remote at the next power-up. Skipped on USB or without a battery.
+- DC weapon (channel Q) uses slow decay. Time-based weapon input smoothing.
+
+### Battery
+- `Cut-off`: below the set voltage per cell, power is limited to 50 % until restart (`LOW V LIM!`). The limit survives a brown-out reset.
+- More accurate robot voltage (factory-calibrated ADC). **Check `Volt Cal` once after updating from 4.x.**
+
+### Remote
+- New home screen: name, signal bars, battery icons, **match timer**, ARMED / SAFE, FLIP, latency.
+- New flat menu `ROBOT` / `REMOTE` / `RADIO` / `SYSTEM`; values change directly in the list.
+- `Sound` OFF / LOW / MED / HIGH, `Idle` reminder, weapon-armed chirp, timer beeps.
+- Removed: `FIND BOT`, `WF Scanner`, the separate Buzzer / Display / Battery submenus.
+
+### Wi-Fi and phone
+- **Welcome page** in the phone's sign-in sheet; **Open remote** then drives full screen in Chrome / Safari.
+- `ROBOT > AP Pass`: optional 8-digit PIN for the robot's network (a BIND-held start is always open).
+- The remote sees a robot in phone mode (`PHONE MODE`) and can return it to remote control with `ROBOT > AP-Mode`.
+- The Wi-Fi updater checks the maker tag (prefix). A file with another tag needs *Allow maker tag change*.
+
+### Status LED
+- Short flicker on solid = weapon armed. Slow double blink = low-voltage limit. Three quick blinks at power-up = the last restart was unexpected.
+
 ## RX 4.32 / TX 4.22 — 2026-10-23
 
 - Wi-Fi network renamed **`VILKAS-<robot>`** (was `BB-UPD-<robot>`).

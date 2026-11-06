@@ -3,3 +3,4 @@
 *.step binary
 *.stp  binary
 *.stl  binary
+SHA256SUMS.txt text eol=lf
