@@ -1,19 +1,20 @@
 # VILKAS user guide
 
-For **TX 5.36 / RX 5.36**. Older firmware may not have every item; settings a robot doesn't support show `N/A` on the remote.
+For **TX 5.46 / RX 5.36**. Older firmware may not have every item; settings a robot doesn't support show `N/A` on the remote.
 
 - [Quick start](#quick-start)
 - [Installing the RX](#installing-the-rx)
 - [Pairing and the robot list](#pairing-and-the-robot-list)
 - [Using the remote](#using-the-remote)
 - [Menu reference](#menu-reference)
+- [Sim Mode: the remote as a PC gamepad](#sim-mode-the-remote-as-a-pc-gamepad)
 - [Where settings are stored](#where-settings-are-stored)
 - [Failsafe and safety](#failsafe-and-safety)
 - [Tournament use: sharing remotes](#tournament-use-sharing-remotes)
 - [Status indicators](#status-indicators)
 - [Troubleshooting](#troubleshooting)
 
-Driving with a phone: [phone-control.md](phone-control.md). Updating firmware: [flashing.md](flashing.md).
+Driving with a phone: [phone-control.md](phone-control.md). Updating firmware: [flashing.md](flashing.md) or the browser [firmware updater](https://dariusv21.github.io/VILKAS/Vilkas-Flasher.html). All menus with the real screens of the remote: [system map](https://dariusv21.github.io/VILKAS/VILKAS%20System%20Map.html).
 
 ---
 
@@ -197,8 +198,34 @@ A value shows `--` while it's being read and `N/A` if the robot's firmware doesn
 | Item | What it does |
 |---|---|
 | `Info` | TX and RX firmware, RX board revision, channel, signal (remote side / robot side, dBm), latency, link quality, unexpected resets `R<n>` |
-| `Diagnostic` | Live raw inputs (Rev C: also the button-ladder voltage) |
+| `Diagnostic` | Live inputs: the stick as a dot in a circle (the small inner circle is the driving deadzone), the weapon knob as a bar, X / Y in −100…+100 and W in %, and the buttons `JB`, `OK`, `BD` (BIND), `FL` (FLIP) light up while pressed. **Hold OK 1 s** for the raw page: raw ADC of X / Y / knob, button-ladder voltage (Rev C) and remote battery. **Hold BIND 2 s** to leave. |
+| `Sim Mode` | Use the remote as a Bluetooth gamepad for a PC game or simulator (hold the joystick button 2 s). See [Sim Mode](#sim-mode-the-remote-as-a-pc-gamepad). TX 5.46+. |
 | `Reset` | Factory reset of the remote's settings. The robot list and robot-side settings are kept. |
+
+---
+
+## Sim Mode: the remote as a PC gamepad
+
+From **TX 5.46** the remote can work as a standard Bluetooth (BLE) gamepad, so you can practise in a robot simulator or play a game with the same stick and knob you fight with. Games, Unity (Input System), Godot, browsers (Gamepad API) and simulators see a normal controller. No driver or special code is needed. The robot radio is off while Sim Mode is on.
+
+1. **Switch it on:** `SYSTEM > Sim Mode`, then hold the joystick button 2 s (BIND cancels). The remote restarts as a gamepad.
+2. **Pair it once:** on Windows open *Settings > Bluetooth & devices > Add device > Bluetooth* and pick **`VILKAS-TX xxxx`**. On Linux use `bluetoothctl` or the Bluetooth panel; macOS and Android work too. The last 4 characters differ for every remote, so several remotes can be paired to one PC.
+3. **Play.** The screen shows the stick, the weapon bar, `PAIR..` (waiting) or `PC OK` (connected), the pressed buttons and the remote battery (`TX USB` while charging). Rising tone = PC connected, falling tone = PC disconnected.
+4. **Leave:** hold **BIND 3 s** (the title bar fills), or hold BIND while switching the remote on. This only leaves Sim Mode; it doesn't open the robot list. Until you leave, Sim Mode stays on, also after switching the remote off and on.
+
+| Remote | Gamepad | Notes |
+|---|---|---|
+| Stick left / right | X axis | 0…32767, centre 16384 |
+| Stick forward / back | Y axis | Forward = 0 (gamepad standard) |
+| Weapon knob | Z axis | 0 = stop. Follows `Pot:` direction |
+| Joystick button | Button 1 | |
+| OK | Button 2 | |
+| FLIP | Button 3 | |
+| BIND | Button 4 | Short press. Hold 3 s to leave Sim Mode |
+
+- The stick uses your `Cal Stick` calibration and `Deadzone`. `Speed`, `Turn` and `Expo` are **not** applied: the game does that.
+- The remote sends a report on every change and at least every 50 ms, and tells the PC its battery level.
+- A firmware build without Bluetooth shows `Not in this build` for this item.
 
 ---
 
@@ -278,6 +305,8 @@ The system is designed for events where a few remotes are shared across many rob
 | Three short high beeps, repeating | Robot battery low (faster when critical) |
 | Two falling tones, repeating | Remote battery low |
 | Two low tones and a longer lower one | Robot and remote firmware don't match |
+| Rising two-tone (Sim Mode) | PC connected to the gamepad |
+| Falling two-tone (Sim Mode) | PC disconnected |
 
 ---
 
@@ -302,4 +331,7 @@ The system is designed for events where a few remotes are shared across many rob
 | Robot battery reading is off | `ROBOT > Battery`: set type and cells, then `Volt Cal` against a multimeter |
 | `VILKAS-…` network doesn't appear | Hold BIND for the full 5 s until the LED lights, or use `ROBOT > AP-Mode`. US phones can't see channel 13. |
 | Wi-Fi update refuses the file | Use the `_ota_` file for your board revision. A different prefix needs *Allow maker tag change*. |
+| Remote shows `SIM MODE` and doesn't drive the robot | It's in Sim Mode (Bluetooth gamepad). Hold BIND 3 s, or hold BIND while switching it on. |
+| PC doesn't find `VILKAS-TX …` | Check the remote shows `PAIR..`, then *Add device > Bluetooth* again. If it was paired before, remove it from the PC's Bluetooth list first. |
+| Stick off-centre or wrong range in a game | `REMOTE > Cal Stick` in normal mode, then check `SYSTEM > Diagnostic`. |
 | Status LED dark, right motor won't reverse | Wrong board revision firmware. Flash the matching `RevB` / `RevC` / `RevD` file over USB. |

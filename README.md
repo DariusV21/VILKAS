@@ -23,6 +23,8 @@ It works like a Malenki Nano + FlySky FS-i6X combination, but it's cheaper. 100 
 
 **No remote? Use a phone.** From RX firmware 4.30, any VILKAS-RX can be driven from a phone browser over the robot's own Wi-Fi, with no app. See [phone control](docs/phone-control.md).
 
+**Practise on a PC.** From TX firmware 5.46, `SYSTEM > Sim Mode` turns the VILKAS-TX into a standard Bluetooth gamepad for robot simulators and games: stick, weapon knob and buttons, no drivers. See [Sim Mode](docs/user-guide.md#sim-mode-the-remote-as-a-pc-gamepad).
+
 ## Where to get it
 
 | | |
@@ -34,8 +36,8 @@ It works like a Malenki Nano + FlySky FS-i6X combination, but it's cheaper. 100 
 
 1. **Pair:** hold BIND on the robot while powering it up, then hold BIND on the remote while powering it up and pick your robot (`LB-…`). See the [user guide](docs/user-guide.md#quick-start).
 2. **No remote?** Hold BIND on the robot for 5 s at power-up, join the Wi-Fi network `VILKAS-LB-…` with your phone and drive. See [phone control](docs/phone-control.md).
-3. **Update the firmware:** get the [latest release](https://github.com/DariusV21/VILKAS/releases) and follow [flashing](docs/flashing.md). Robots update over Wi-Fi, no cable needed.
-4. **Learn the menus:** [user guide](docs/user-guide.md).
+3. **Update the firmware:** robots update over Wi-Fi, no cable needed. Remotes (and robots on a USB cable) update from the browser with the [VILKAS firmware updater](https://dariusv21.github.io/VILKAS/Vilkas-Flasher.html). Details: [flashing](docs/flashing.md) and the [latest release](https://github.com/DariusV21/VILKAS/releases).
+4. **Learn the menus:** [user guide](docs/user-guide.md), or the interactive [system map](https://dariusv21.github.io/VILKAS/VILKAS%20System%20Map.html) with the real screens of the remote.
 
 ## Current status
 
@@ -44,8 +46,8 @@ It works like a Malenki Nano + FlySky FS-i6X combination, but it's cheaper. 100 
 | VILKAS-RX Rev B | In the field | ✅ RX 5.36 |
 | VILKAS-RX Rev C | ✅ Shipping | ✅ RX 5.36 |
 | VILKAS-RX Rev D (triple DC motor) | ⏳ Not built yet | ✅ Ready (RX 5.36) |
-| VILKAS-TX Rev B | In the field | ✅ TX 5.36 |
-| VILKAS-TX Rev C | ✅ Released | ✅ TX 5.36 |
+| VILKAS-TX Rev B | In the field | ✅ TX 5.46 |
+| VILKAS-TX Rev C | ✅ Released | ✅ TX 5.46 |
 
 ## What this repository contains
 
@@ -56,6 +58,8 @@ It works like a Malenki Nano + FlySky FS-i6X combination, but it's cheaper. 100 
 | [`docs/hardware/`](docs/hardware/) | Pinouts, electrical specifications and board dimensions for VILKAS-RX and VILKAS-TX | CC BY 4.0 |
 | [`docs/phone-control.md`](docs/phone-control.md) | Driving a robot from a phone (RX ≥ 4.30), plus the phone WebSocket interface | CC BY 4.0 |
 | [`docs/flashing.md`](docs/flashing.md) | How to flash official firmware, your own firmware, and how to go back | CC BY 4.0 |
+| [`docs/Vilkas-Flasher.html`](docs/Vilkas-Flasher.html) | Browser firmware updater for VILKAS-TX and VILKAS-RX over USB ([open it](https://dariusv21.github.io/VILKAS/Vilkas-Flasher.html)) | CC BY 4.0 |
+| [`docs/VILKAS System Map.html`](<docs/VILKAS System Map.html>) | Interactive map of the TX menus with the real OLED screens, Sim Mode, and the RX hardware ([open it](https://dariusv21.github.io/VILKAS/VILKAS%20System%20Map.html)) | CC BY 4.0 |
 | [`examples/`](examples/) | Minimal compatible RX and TX sketches (Arduino, ESP32-C3) | MIT |
 | [`mechanical/`](mechanical/) | STEP models of the boards and STL files of the remote enclosure | CC BY 4.0 |
 | [`firmware/`](firmware/) | Official compiled firmware images (`.bin`) with SHA-256 checksums | Free to use and redistribute unmodified (see [LICENSE.md](LICENSE.md)) |
@@ -80,6 +84,8 @@ Every VILKAS-RX announces a 2-character manufacturer prefix (shown on the remote
 ## Quick links
 
 - [User guide](docs/user-guide.md)
+- [Firmware updater (browser, USB)](https://dariusv21.github.io/VILKAS/Vilkas-Flasher.html)
+- [System map (menus and screens)](https://dariusv21.github.io/VILKAS/VILKAS%20System%20Map.html)
 - [System overview](docs/system-overview.md)
 - [Phone control](docs/phone-control.md)
 - [Protocol v4 specification](docs/protocol/VILKAS-protocol-v4.md)

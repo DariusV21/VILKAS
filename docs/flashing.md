@@ -59,23 +59,38 @@ Needed for the remote, for the very first flash, or when Wi-Fi isn't an option.
 
 > **ESC calibration is skipped while the robot is connected by USB**, so a robot on your desk can't spin up its weapon.
 
-### Option A: browser (no install)
+### Option A: VILKAS firmware updater (browser, no install)
+
+1. Open the [VILKAS firmware updater](https://dariusv21.github.io/VILKAS/Vilkas-Flasher.html) in Chrome, Edge or Opera on a computer.
+2. Pick **TX** or **RX**, the board revision and the version (the newest is preselected).
+3. Click **Connect & flash** and pick the port named *USB JTAG/serial debug unit*. If none appears, hold BOOT while plugging in.
+4. Wait for *Update complete*. Pairing, calibration and settings are kept unless you tick *Erase everything first*.
+
+The updater downloads the official image from this repository, checks its SHA-256, refuses an RX image on a remote or the wrong RX revision, and writes only the parts that changed.
+
+### Option B: any ESP32 web flasher
 
 1. Open the [Espressif web flasher](https://espressif.github.io/esptool-js/) in Chrome or Edge.
 2. Click **Connect** and select the ESP32-C3 port. If none appears, hold BOOT while plugging in.
 3. Set the flash address to **`0x0`**, choose the `_usb_` file (robot) or the `TX_Rev_…` file (remote) and click **Program**.
 4. Power-cycle the device.
 
-### Option B: esptool
+### Option C: esptool
 
 ```bash
 pip install esptool
-esptool.py --chip esp32c3 --port COM5 --baud 460800 write_flash 0x0 TX_Rev_C_V5.36.bin
+esptool.py --chip esp32c3 --port COM5 --baud 460800 write_flash 0x0 TX_Rev_C_V5.46.bin
 ```
 
 Replace `COM5` with your port (`/dev/ttyACM0` on Linux, `/dev/cu.usbmodem…` on macOS).
 
 If a device behaves strangely after an upgrade, run `esptool.py --chip esp32c3 erase_flash` first, then write the full image again, then re-pair and re-calibrate. Erasing an RX also clears its bound remote and all robot settings.
+
+### TX 5.46 flash layout
+
+From TX 5.46 the remote uses the *Minimal SPIFFS* partition layout (1.9 MB app, OTA kept) so that Bluetooth for Sim Mode fits. The official `TX_Rev_…` image already contains the new partition table, so nothing changes for you: flash it at `0x0`. Settings live at the same address (NVS at `0x9000`), so **calibration, settings and the robot list are kept**, also when you go back to 5.36. A remote in Sim Mode flashes the same way and stays in Sim Mode afterwards (hold BIND 3 s to leave).
+
+If you build your own TX firmware in the Arduino IDE that should keep these settings, choose *Tools > Partition Scheme > Minimal SPIFFS (1.9MB APP with OTA/128KB SPIFFS)*.
 
 ### Recovery
 

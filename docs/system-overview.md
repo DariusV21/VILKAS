@@ -11,6 +11,7 @@
           ESP-NOW, 2.4 GHz, channels 1 / 5 / 9 / 13
 
   Phone (browser)  ── Wi-Fi AP + WebSocket ──▶  VILKAS-RX in Wi-Fi mode (RX ≥ 4.30)
+  VILKAS-TX in Sim Mode ── Bluetooth LE gamepad ──▶  PC game / simulator (TX ≥ 5.46)
 ```
 
 ## Who does what
@@ -33,7 +34,8 @@ The result is that **one remote can drive many robots**: at an event, 20 robots 
 2. **Set up the robot once** in the remote's `ROBOT` menu (motor direction, speed, weapon output and limits, battery). The settings are saved in the robot.
 3. **Drive.** The home screen shows signal, both batteries, the match timer, ARMED / SAFE and latency.
 4. **No remote?** Hold BIND for 5 s while powering up the robot, connect your phone to `VILKAS-<name>` and drive from the page that opens. See [phone control](phone-control.md).
-5. **Weapon arming:** after power-up, link loss or leaving the menu, the weapon only starts after the knob has been returned to 0 % (ESC) or the centre (DC / SERVO). The home screen shows `SAFE` until then.
+5. **Practise on a PC:** `SYSTEM > Sim Mode` on the remote (TX 5.46+) makes it a Bluetooth gamepad for simulators. See [Sim Mode](user-guide.md#sim-mode-the-remote-as-a-pc-gamepad).
+6. **Weapon arming:** after power-up, link loss or leaving the menu, the weapon only starts after the knob has been returned to 0 % (ESC) or the centre (DC / SERVO). The home screen shows `SAFE` until then.
 
 ## Versions
 

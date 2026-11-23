@@ -6,8 +6,8 @@
 
 | Rev | Hardware | Firmware |
 |---|---|---|
-| B | In the field | ✅ `TX_Rev_B_V5.36.bin` |
-| C | ✅ **Released** | ✅ `TX_Rev_C_V5.36.bin` (from 5.36) |
+| B | In the field | ✅ `TX_Rev_B_V5.46.bin` |
+| C | ✅ **Released** | ✅ `TX_Rev_C_V5.46.bin` (supported from 5.36) |
 
 The remote has no hardware ID pin, so you must flash the image for your board's revision. Rev B firmware on a Rev C board (or the reverse) won't read the buttons correctly.
 
@@ -21,7 +21,8 @@ The remote has no hardware ID pin, so you must flash the image for your board's 
 | Rev C extras | All push buttons on one ADC pin (resistor ladder), optional rotary encoder footprint (not used by the firmware yet), on-board charging (TP4056 module) |
 | Output | Passive magnetic buzzer (12 × 8.5 mm, 16 Ω) |
 | Battery | 1S Li-ion / LiPo |
-| Firmware update | USB-C on the ESP32-C3 module (native USB) |
+| Firmware update | USB-C on the ESP32-C3 module (native USB). From TX 5.46 the flash uses the *Minimal SPIFFS* layout (1.9 MB app) |
+| Bluetooth | BLE gamepad in Sim Mode (TX 5.46+): `VILKAS-TX xxxx`, axes X / Y / Z, 4 buttons. The ESP-NOW robot link is off while Sim Mode is on |
 | Enclosure | 3D printed. STL files are in [`mechanical/enclosure/`](../../mechanical/enclosure/) |
 | Mechanical models | [`mechanical/VILKAS-TX/`](../../mechanical/VILKAS-TX/) (Rev B and Rev C) |
 

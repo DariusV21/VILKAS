@@ -2,6 +2,18 @@
 
 User-facing changes in official VILKAS firmware. Protocol changes are marked **[protocol]**.
 
+## TX 5.46 — 2026-11-23
+
+Remote only. Works with every 4.x / 5.x robot; no RX update needed. Protocol unchanged (v4.3).
+
+- **`SYSTEM > Sim Mode`: the remote as a Bluetooth gamepad for a PC.** Hold the joystick button 2 s; the remote restarts with the robot radio off and shows up as a standard Bluetooth (BLE) gamepad named `VILKAS-TX xxxx`. Games, Unity, Godot, browsers (Gamepad API) and simulators see a normal controller.
+  - Axes 0–32767: **X** = stick left / right, **Y** = stick forward / back (forward = 0), **Z** = weapon knob (0 = stop). The stick uses your calibration and deadzone; Speed, Turn and Expo are not applied.
+  - Buttons: **1** = joystick button, **2** = OK, **3** = FLIP, **4** = BIND.
+  - Screen: stick, weapon bar, `PAIR..` / `PC OK`, pressed buttons, remote battery. Rising tone when the PC connects, falling tone when it disconnects.
+  - **Leave:** hold BIND 3 s, or hold BIND while switching the remote on (this only leaves Sim Mode, it doesn't open the robot list). Sim Mode stays on across power cycles until you leave it.
+- **New `SYSTEM > Diagnostic` screen:** stick as a dot in a circle (the inner circle is the driving deadzone), weapon knob as a bar, X / Y in −100…+100, W in %, and the buttons `JB` / `OK` / `BD` / `FL` light up while pressed. Hold OK 1 s for the raw ADC page (with the button-ladder voltage on Rev C). Hold BIND 2 s to leave.
+- **Flash layout:** the remote now uses the *Minimal SPIFFS* partition layout (1.9 MB app) to fit Bluetooth. The official `.bin` already contains it; flash it at `0x0` as before. **Calibration, settings and the robot list are kept.** Flashing an older TX version back also works.
+
 ## TX 5.36 / RX 5.36 — 2026-11-06
 
 First public 5.x release. It contains everything from 5.00 to 5.36. Update the remote and the robots together for every feature; mixed 4.x / 5.x devices still work together. **TX Rev C is supported from this release**, and RX Rev B images are back.

@@ -7,9 +7,11 @@ Official VILKAS firmware images. How to flash them: [docs/flashing.md](../docs/f
 | Unit | Version | Folder | Boards |
 |---|---|---|---|
 | VILKAS-RX from **[Lithuanian Bots](https://lithuanianbots.com/)** | **5.36** | [`RX_v5.36_LB/`](RX_v5.36_LB/) | Rev B ✅ · Rev C ✅ · Rev D ✅ (no hardware yet) |
-| VILKAS-TX | **5.36** | [`TX_v5.36/`](TX_v5.36/) | Rev B ✅ · Rev C ✅ |
+| VILKAS-TX | **5.46** | [`TX_v5.46/`](TX_v5.46/) | Rev B ✅ · Rev C ✅ |
 
-Update the remote and the robots together to get every 5.x feature. Mixed versions still work (see below).
+Update the remote and the robots together to get every 5.x feature. Mixed versions still work (see below). TX 5.46 is a remote-only release (Sim Mode, new Diagnostic screen); RX 5.36 is still current for robots.
+
+Easiest way to flash over USB: the [VILKAS firmware updater](https://dariusv21.github.io/VILKAS/Vilkas-Flasher.html) in Chrome or Edge. It picks the right file and keeps your settings.
 
 **Which prefix?** The robot's name starts with it. `LB-…` boards are from Lithuanian Bots. For `DV-…` boards, ask DV Electronics for firmware.
 
@@ -20,9 +22,9 @@ firmware/
 │   ├── RX_RevB_V5.36_usb_LB.bin   # USB, flash at 0x0
 │   ├── … same for RevC and RevD
 │   └── SHA256SUMS.txt
-├── TX_v5.36/
-│   ├── TX_Rev_B_V5.36.bin         # USB, flash at 0x0
-│   ├── TX_Rev_C_V5.36.bin
+├── TX_v5.46/
+│   ├── TX_Rev_B_V5.46.bin         # USB, flash at 0x0
+│   ├── TX_Rev_C_V5.46.bin
 │   └── SHA256SUMS.txt
 └── _archive/                      # previous versions
 ```
@@ -35,13 +37,16 @@ All 4.x and 5.x remotes and robots work together (protocol major 4). Features th
 
 | TX | RX | Works | Notes |
 |---|---|---|---|
-| 5.36 | 5.36 | ✅ | **Recommended** |
+| 5.46 | 5.36 | ✅ | **Recommended** |
+| 5.36 | 5.36 | ✅ | Same, without Sim Mode and the new Diagnostic screen |
 | 5.x | 4.x | ✅ | New robot settings show `N/A`. Update the robot over Wi-Fi. |
 | 4.x | 5.x | ✅ | New settings aren't in the old remote's menu. Update the remote. |
 | ≤ 4.21 | ≥ 4.32 | ✅ | `RX AP-Mode` shows the old network name / address; use `VILKAS-…` and 4.3.2.1 |
 | 4.x / 5.x | ≤ 3.x | ❌ | Remote shows `OLD RX FW!`. Update the robot over USB. |
 | ≤ 3.x | 4.x / 5.x | ❌ | Robot triple-blinks. Update the remote. |
 | — (phone) | ≥ 4.30 | ✅ | [Phone control](../docs/phone-control.md), no remote needed |
+
+**TX 5.46 note:** the remote moved to the *Minimal SPIFFS* flash layout (1.9 MB app) to fit Bluetooth for Sim Mode. The full image contains the new partition table, so flash it at `0x0` as usual; calibration, settings and the robot list are kept. Going back to 5.36 works the same way.
 
 **RX 5.00 note:** the robot's battery voltage calibration starts again from 1.00 after updating from 4.x. Check `ROBOT > Battery > Volt Cal` once.
 
@@ -59,6 +64,7 @@ All 4.x and 5.x remotes and robots work together (protocol major 4). Features th
 
 | Release | Date | Highlights |
 |---|---|---|
+| TX 5.46 | 2026-11-23 | Sim Mode (the remote as a Bluetooth gamepad for PC simulators), new Diagnostic screen, larger app partition |
 | RX 5.36 / TX 5.36 | 2026-11-06 | 100 Hz control, 20 kHz quiet drive, new menu and home screen, match timer, fast reset recovery, low-voltage limit, ESC calibration, Wi-Fi PIN, phone welcome page, TX Rev C |
 | RX 4.32 / TX 4.22 | 2026-10-23 | Wi-Fi network `VILKAS-<name>`, address 4.3.2.1 |
 | RX 4.31 | 2026-10-22 | Advanced settings page, "Always start in Wi-Fi phone mode" |
