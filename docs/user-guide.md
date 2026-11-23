@@ -14,7 +14,7 @@ For **TX 5.46 / RX 5.36**. Older firmware may not have every item; settings a ro
 - [Status indicators](#status-indicators)
 - [Troubleshooting](#troubleshooting)
 
-Driving with a phone: [phone-control.md](phone-control.md). Updating firmware: [flashing.md](flashing.md) or the browser [firmware updater](https://dariusv21.github.io/VILKAS/Vilkas-Flasher.html). All menus with the real screens of the remote: [system map](https://dariusv21.github.io/VILKAS/VILKAS%20System%20Map.html).
+Driving with a phone: [phone-control.md](phone-control.md). Updating firmware: [flashing.md](flashing.md) or the browser [firmware updater](https://dariusv21.github.io/vilkas/flasher.html). All menus with the real screens of the remote: [system map](https://dariusv21.github.io/vilkas/system-map.html).
 
 ---
 

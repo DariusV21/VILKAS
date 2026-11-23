@@ -61,7 +61,7 @@ Needed for the remote, for the very first flash, or when Wi-Fi isn't an option.
 
 ### Option A: VILKAS firmware updater (browser, no install)
 
-1. Open the [VILKAS firmware updater](https://dariusv21.github.io/VILKAS/Vilkas-Flasher.html) in Chrome, Edge or Opera on a computer.
+1. Open the [VILKAS firmware updater](https://dariusv21.github.io/vilkas/flasher.html) in Chrome, Edge or Opera on a computer.
 2. Pick **TX** or **RX**, the board revision and the version (the newest is preselected).
 3. Click **Connect & flash** and pick the port named *USB JTAG/serial debug unit*. If none appears, hold BOOT while plugging in.
 4. Wait for *Update complete*. Pairing, calibration and settings are kept unless you tick *Erase everything first*.

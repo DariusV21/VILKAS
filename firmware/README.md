@@ -11,7 +11,7 @@ Official VILKAS firmware images. How to flash them: [docs/flashing.md](../docs/f
 
 Update the remote and the robots together to get every 5.x feature. Mixed versions still work (see below). TX 5.46 is a remote-only release (Sim Mode, new Diagnostic screen); RX 5.36 is still current for robots.
 
-Easiest way to flash over USB: the [VILKAS firmware updater](https://dariusv21.github.io/VILKAS/Vilkas-Flasher.html) in Chrome or Edge. It picks the right file and keeps your settings.
+Easiest way to flash over USB: the [VILKAS firmware updater](https://dariusv21.github.io/vilkas/flasher.html) in Chrome or Edge. It picks the right file and keeps your settings.
 
 **Which prefix?** The robot's name starts with it. `LB-…` boards are from Lithuanian Bots. For `DV-…` boards, ask DV Electronics for firmware.
 
